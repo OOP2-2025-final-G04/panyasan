@@ -17,15 +17,16 @@
         <thead>
             <tr>
                 <th>&nbsp;</th>
+                <th>ID</th>
                 <th>パンの名前</th>
                 <th>価格</th>
-                <th>個数</th>
             </tr>
         </thead>
         <tbody>
             {% for product in items %}
             <tr>
                 <td><a href="{{ url_for('product.edit', product_id=product.id) }}">編集</a></td>
+                <td>{{ product.id }}</td>
                 <td>{{ product.name }}</td>
                 <td>{{ product.price }}</td>
             </tr>
