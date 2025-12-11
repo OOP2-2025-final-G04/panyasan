@@ -16,20 +16,32 @@
     <table>
         <thead>
             <tr>
-                <th>&nbsp;</th>
-                <th>名前</th>
-                <th>年齢</th>
-            </tr>
+    <th>&nbsp;</th>
+    <th>名前</th>
+    <th>年齢</th>
+    <th>生年月日</th>
+    <th>性別</th>
+    <th>ポイント</th>
+</tr>
+
         </thead>
         <tbody>
-            {% for user in items %}
-            <tr>
-                <td><a href="{{ url_for('user.edit', user_id=user.id) }}">編集</a></td>
-                <td>{{ user.name }}</td>
-                <td>{{ user.age }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+    {% for user in items %}
+    <tr>
+        <td><a href="{{ url_for('user.edit', user_id=user.id) }}">編集</a></td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.age }}</td>
+        <td>{{ user.birth_date }}</td>
+        <td>
+            {% if user.gender == "M" %}男性{% endif %}
+            {% if user.gender == "F" %}女性{% endif %}
+            {% if user.gender == "O" %}その他{% endif %}
+        </td>
+        <td>{{ user.point }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+
     </table>
 </body>
 </html>

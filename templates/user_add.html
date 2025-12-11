@@ -14,9 +14,33 @@
     </ul>
 
     <form action="{{ url_for('user.add') }}" method="post">
-        <label>名前: <input type="text" name="name" required></label><br>
-        <label>年齢: <input type="number" name="age" required></label><br>
-        <button type="submit">追加</button>
-    </form>
+    <label>名前:
+        <input type="text" name="name" required>
+    </label><br>
+
+    <label>年齢:
+        <input type="number" name="age" required>
+    </label><br>
+
+    <label>生年月日:
+        <input type="date" name="birth_date" required>
+    </label><br>
+
+    <label>ポイント:
+    <input type="number" name="point" value="0" required>
+    </label><br>
+
+
+    <label>性別:
+        <select name="gender" required>
+            <option value="M">男性</option>
+            <option value="F">女性</option>
+            <option value="O">その他</option>
+        </select>
+    </label><br>
+
+    <button type="submit">追加</button>
+</form>
+
 </body>
 </html>
