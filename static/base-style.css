@@ -37,3 +37,21 @@ th {
 .breadcrumb li:nth-last-child()::after {
   content: "";
 }
+
+/* パン屋パターン背景 */
+.bakery-bg-pattern {
+    min-height: 100vh;
+    background-color: #FFE8C7;
+    background-image: url('data:image/svg+xml;utf8,\
+      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">\
+        <g fill="%23F7B267" fill-opacity="0.25">\
+          <circle cx="10" cy="10" r="6"/>\
+          <rect x="34" y="8" width="16" height="10" rx="3"/>\
+        </g>\
+      </svg>');
+    background-repeat: repeat;
+    background-attachment: fixed;
+    color: #3a2a1a;
+    font-family: "Noto Sans JP", sans-serif;
+    padding: 2rem;
+}
