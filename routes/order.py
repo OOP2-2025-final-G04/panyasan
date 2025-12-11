@@ -54,7 +54,14 @@ def edit(order_id):
         order.count = request.form['order_count']
         order.save()
         # ポイントの増減をする
-        if(pre_order_count != order.count): # 個数が変化した時
+        if(product.id != order.product): # 購入した製品が変化した時
+            user.point -= this_order_got_point # この注文で獲得済みのポイントを、一旦なくす
+            # ポイントを追加する（修正後の個数で再計算）
+            total_price =(Product.get_by_id(order.product)).price * int(order.count)
+            get_point = int(total_price / 100)
+            user.point += get_point
+            user.save()
+        elif(pre_order_count != order.count): # 個数が変化した時
             user.point -= this_order_got_point # この注文で獲得済みのポイントを、一旦なくす
             # ポイントを追加する（修正後の個数で再計算）
             total_price =price * int(order.count)
