@@ -20,6 +20,7 @@
                 <th>ユーザー</th>
                 <th>製品</th>
                 <th>注文日</th>
+                <th>個数</th>
             </tr>
         </thead>
         <tbody>
@@ -29,6 +30,7 @@
                 <td>{{ order.user.name }}</td>
                 <td>{{ order.product.name }}</td>
                 <td>{{ order.order_date }}</td>
+                <td>{{ order.count }}</td>
             </tr>
             {% endfor %}
         </tbody>
