@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ポイント消費</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base-style.css') }}">
+</head>
+<body class="bakery-bg-pattern">
+
+    <h1>ポイント消費</h1>
+
+    <ul class="breadcrumb">
+        <li><a href="{{ url_for('index') }}">HOME</a></li>
+        <li>ポイント消費</li>
+    </ul>
+
+    <!--エラー-->
+    {% if error_message %}
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <p>{{ error_message }}</p>
+            <button onclick="closeModal()">閉じる</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ポイント消費フォーム -->
+    <form action="{{ url_for('point.consume') }}" method="post">
+        <label>ユーザー:
+            <select name="user_id" required>
+                {% for user in users %}
+                    <option value="{{ user.id }}">
+                        {{ user.name }}（現在 {{ user.point }} pt）
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>消費ポイント:
+            <input type="number" name="use_point" min="1" required>
+        </label>
+
+        <button type="submit">ポイントを消費</button>
+    </form>
+
+    <hr>
+
+    <!-- 履歴一覧 -->
+    <h2>{{ title }}</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ユーザー</th>
+                <th>消費ポイント</th>
+                <th>消費日時</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for history in items %}
+            <tr>
+                <td>{{ history.user.name }}</td>
+                <td>{{ history.used_point }}</td>
+                <td>{{ history.used_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!--JavaScript-->
+    <script>
+        function closeModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+
+</body>
+</html>
