@@ -11,6 +11,11 @@ initialize_database()
 for blueprint in blueprints:
     app.register_blueprint(blueprint)
 
+# ポイント用Blueprint
+from routes.point import point_bp
+app.register_blueprint(point_bp)
+
+
 # ホームページのルート
 @app.route('/')
 def index():
