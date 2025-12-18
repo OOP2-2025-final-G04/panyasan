@@ -70,17 +70,17 @@
       try {
         const response = await fetch('/products/api');
         const data = await response.json();
-        const products = data.products;
+        const sales = data.sales;
 
         // グラフ作成
         const ctx = document.getElementById("productChart");
         const productChart = new Chart(ctx, {
           type: "bar",
           data: {
-            labels: products.map(p => p.name),
+            labels: sales.map(s => s.name),
             datasets: [{
-              label: "価格（円）",
-              data: products.map(p => p.price),
+              label: "売上（円）",
+              data: sales.map(s => s.price),
               backgroundColor: 'rgba(75, 192, 192, 0.2)',
               borderColor: 'rgba(75, 192, 192, 1)',
               borderWidth: 1
