@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from models import Product
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from models import Product, Order
+from peewee import fn
 
 # Blueprintの作成
 product_bp = Blueprint('product', __name__, url_prefix='/products')
@@ -37,3 +38,16 @@ def edit(product_id):
         return redirect(url_for('product.list'))
 
     return render_template('product_edit.html', product=product)
+
+@product_bp.route('/api')
+def api():
+    products = Product.select()
+    price_sum = {}
+    for p in products:
+        name = p.name
+        price = float(p.price)
+        if name in price_sum:
+            price_sum[name] += price
+        else:
+            price_sum[name] = price
+    return jsonify({'products': [{'name': name, 'price': price} for name, price in price_sum.items()]})
