@@ -60,7 +60,54 @@
 
 
     <!-- 中段：1枠 -->
-    <div class="graph-box">グラフ③</div>
+    <div class="graph-box">
+      <h2 style="text-align: left; margin: 20px 0 15px 0;">パンの種類別売上</h2>
+      <canvas id="productChart" width="600" height="300"></canvas>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // 製品データを取得してグラフを表示
+    async function loadProducts() {
+      try {
+        const response = await fetch('/products/api');
+        const data = await response.json();
+        const products = data.products;
+
+        // グラフ作成
+        const ctx = document.getElementById("productChart");
+        const productChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: products.map(p => p.name),
+            datasets: [{
+              label: "価格（円）",
+              data: products.map(p => p.price),
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 10000,  // 最大10000円
+                ticks: {
+                  stepSize: 1000  // 1メモリ1000円、10個の目盛り
+                }
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    }
+
+    // ページ読み込み時に実行
+    loadProducts();
+  </script>
+    </div>
+
 
     <!-- 下段：1枠 -->
     <div class="graph-box">グラフ
@@ -68,6 +115,7 @@
     </div>
 
   </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -157,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
+
 
 </body>
 </html>
