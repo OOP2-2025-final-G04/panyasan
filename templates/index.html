@@ -23,7 +23,9 @@
 
     <!-- 上段：2枠 -->
     <div class="graph-row-top">
-      <div class="graph-box">グラフ①</div>
+    <div class="graph-box">
+        <canvas id="ageGenderChart"></canvas>
+      </div>
       <div class="graph-box">グラフ②</div>
     </div>
 
@@ -34,6 +36,47 @@
     <div class="graph-box">グラフ④</div>
 
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // サーバーから最新データを取得
+      fetch('/api/stats/age-gender')
+        .then(response => {
+           if (!response.ok) {
+             throw new Error('Network response was not ok');
+           }
+           return response.json();
+        })
+        .then(data => {
+          // グラフを描画
+          const ctx = document.getElementById('ageGenderChart').getContext('2d');
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: data.labels,
+              datasets: data.datasets
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false, // 枠に合わせてサイズ自動調整
+              scales: {
+                x: { stacked: false }, // 積み上げにしない
+                y: { beginAtZero: true, stepSize: 1 }
+              },
+              plugins: {
+                title: { display: true, text: '年代別・性別ユーザー構成' },
+                legend: { position: 'bottom' }
+              }
+            }
+          });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // グラフ枠にエラーを表示する（デバッグ用）
+            document.querySelector('.graph-box').innerText = 'グラフの読み込みに失敗しました';
+        });
+    });
+  </script>
 </body>
 
 </html>
