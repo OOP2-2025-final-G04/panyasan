@@ -6,6 +6,9 @@
   <title>注文管理システム</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='base-style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='index-style.css') }}">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bakery-bg-pattern">
@@ -24,8 +27,35 @@
     <!-- 上段：2枠 -->
     <div class="graph-row-top">
       <div class="graph-box">グラフ①</div>
-      <div class="graph-box">グラフ②</div>
+
+      <!-- グラフ②：ユーザー別ポイント消費ランキング -->
+      <div class="graph-box">
+  <section class="user_ranking">
+
+    <!-- ★ 数値で位置調整できるタイトル -->
+    <h3 class="ranking-title">ポイント消費ランキング（TOP5）</h3>
+
+    <div class="ranking-content">
+      <!-- 左：円グラフ -->
+      <div class="chart-area">
+        <canvas id="user_ranking_chart" width="260" height="260"></canvas>
+      </div>
+
+      <!-- 右：ランキング表示 -->
+      <div class="ranking-list">
+        <ol>
+          {% for name, value in ranking_data %}
+          <li>
+            {{ name }}：{{ value }} pt
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
     </div>
+
+  </section>
+</div>
+
 
     <!-- 中段：1枠 -->
     <div class="graph-box">グラフ③</div>
@@ -34,6 +64,35 @@
     <div class="graph-box">グラフ④</div>
 
   </div>
-</body>
 
+  <!-- 円グラフ描画 -->
+  <script>
+    const userLabels = {{ labels | tojson }};
+    const userValues = {{ values | tojson }};
+
+    const ctx = document
+      .getElementById('user_ranking_chart')
+      .getContext('2d');
+
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: userLabels,
+        datasets: [{
+          data: userValues,
+          radius: '80%'
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: {
+            display: false   // ← 凡例は右側のリストで表示
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
 </html>
