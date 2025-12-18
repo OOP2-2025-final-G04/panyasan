@@ -6,8 +6,6 @@
   <title>注文管理システム</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='base-style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='index-style.css') }}">
-
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -26,13 +24,15 @@
 
     <!-- 上段：2枠 -->
     <div class="graph-row-top">
-      <div class="graph-box">グラフ①</div>
+<!-- グラフ①：年齢（年齢 × 性別） -->
+<div class="graph-box">
+  <canvas id="ageGenderChart"></canvas>
+</div>
 
-      <!-- グラフ②：ユーザー別ポイント消費ランキング -->
-      <div class="graph-box">
+<!-- グラフ②：ユーザー別ポイント消費ランキング -->
+<div class="graph-box">
   <section class="user_ranking">
 
-    <!-- ★ 数値で位置調整できるタイトル -->
     <h3 class="ranking-title">ポイント消費ランキング（TOP5）</h3>
 
     <div class="ranking-content">
@@ -45,12 +45,14 @@
       <div class="ranking-list">
         <ol>
           {% for name, value in ranking_data %}
-          <li>
-            {{ name }}：{{ value }} pt
-          </li>
+          <li>{{ name }}：{{ value }} pt</li>
           {% endfor %}
         </ol>
       </div>
+    </div>
+  </section>
+</div>
+
     </div>
 
   </section>
@@ -61,38 +63,101 @@
     <div class="graph-box">グラフ③</div>
 
     <!-- 下段：1枠 -->
-    <div class="graph-box">グラフ④</div>
+    <div class="graph-box">グラフ④
+      <canvas id="daily-sales-chart"></canvas>
+    </div>
 
   </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- 円グラフ描画 -->
-  <script>
-    const userLabels = {{ labels | tojson }};
-    const userValues = {{ values | tojson }};
+<script>
+document.addEventListener('DOMContentLoaded', function() {
 
-    const ctx = document
-      .getElementById('user_ranking_chart')
-      .getContext('2d');
-
-    new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: userLabels,
-        datasets: [{
-          data: userValues,
-          radius: '80%'
-        }]
-      },
-      options: {
-        responsive: false,
-        plugins: {
-          legend: {
-            display: false   // ← 凡例は右側のリストで表示
+  /* ===== グラフ①：年齢 × 性別 ===== */
+  fetch('/api/stats/age-gender')
+    .then(res => res.json())
+    .then(data => {
+      const ctx = document.getElementById('ageGenderChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.labels,
+          datasets: data.datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true }
+          },
+          plugins: {
+            title: { display: true, text: '年代別・性別ユーザー構成' },
+            legend: { position: 'bottom' }
           }
         }
-      }
+      });
+    })
+    .catch(() => {
+      document.querySelector('#ageGenderChart')
+        .parentElement.innerText = 'グラフの読み込みに失敗しました';
     });
-  </script>
+
+  /* ===== グラフ②：ポイント消費ランキング（円グラフ） ===== */
+  const userLabels = {{ labels | tojson }};
+  const userValues = {{ values | tojson }};
+
+  const rankingCtx = document
+    .getElementById('user_ranking_chart')
+    .getContext('2d');
+
+  new Chart(rankingCtx, {
+    type: 'pie',
+    data: {
+      labels: userLabels,
+      datasets: [{
+        data: userValues,
+        radius: '80%'
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+
+  /* ===== グラフ④：日別売上 ===== */
+  fetch('/orders/api/sales/daily')
+    .then(res => res.json())
+    .then(json => {
+      const ctx = document.getElementById('daily-sales-chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: json.labels,
+          datasets: [{
+            label: '日別売上',
+            data: json.data,
+            fill: false,
+            tension: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: { display: true, text: '日別売上（円）' }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    });
+
+});
+</script>
 
 </body>
 </html>
+
