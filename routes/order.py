@@ -1,3 +1,4 @@
+from flask import jsonify
 from flask import Blueprint, render_template, request, redirect, url_for
 from models import Order, User, Product
 from datetime import datetime
@@ -66,3 +67,26 @@ def edit(order_id):
     users = User.select()
     products = Product.select()
     return render_template('order_edit.html', order=order, users=users, products=products)
+
+
+# 日別売上合計を返すAPI
+@order_bp.route('/api/sales/daily')
+def daily_sales():
+    # Orderテーブルから日付ごとに売上合計を集計
+    from peewee import fn # 集計関数を使用するため（SUMとか）
+    query = (Order
+        .select(Order.order_date, fn.SUM(Product.price * Order.count).alias('total'))
+        .join(Product) # OrdeerテーブルとProductテーブルを結合
+        .group_by(fn.DATE(Order.order_date)) # 日付ごとにグループ化
+        .order_by(Order.order_date)) # 日付順に並べ替え
+    labels = [] # グラフX軸
+    data = [] # グラフY軸
+    for row in query:
+        date_str = row.order_date.strftime('%Y-%m-%d') # 日付を文字列に変換
+        if date_str not in labels: # その日付がまだX軸になければ追加
+            labels.append(date_str)
+            data.append(float(row.total))
+        else: # 同じ日付が複数回出てきた場合は合算
+            idx = labels.index(date_str)
+            data[idx] += float(row.total)
+    return jsonify({"labels": labels, "data": data})  # 日付リスト、売上リストをJSON形式で変換
