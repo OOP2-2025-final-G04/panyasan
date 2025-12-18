@@ -24,11 +24,40 @@
 
     <!-- 上段：2枠 -->
     <div class="graph-row-top">
-    <div class="graph-box">
-        <canvas id="ageGenderChart"></canvas>
+<!-- グラフ①：年齢（年齢 × 性別） -->
+<div class="graph-box">
+  <canvas id="ageGenderChart"></canvas>
+</div>
+
+<!-- グラフ②：ユーザー別ポイント消費ランキング -->
+<div class="graph-box">
+  <section class="user_ranking">
+
+    <h3 class="ranking-title">ポイント消費ランキング（TOP5）</h3>
+
+    <div class="ranking-content">
+      <!-- 左：円グラフ -->
+      <div class="chart-area">
+        <canvas id="user_ranking_chart" width="260" height="260"></canvas>
       </div>
-      <div class="graph-box">グラフ②</div>
+
+      <!-- 右：ランキング表示 -->
+      <div class="ranking-list">
+        <ol>
+          {% for name, value in ranking_data %}
+          <li>{{ name }}：{{ value }} pt</li>
+          {% endfor %}
+        </ol>
+      </div>
     </div>
+  </section>
+</div>
+
+    </div>
+
+  </section>
+</div>
+
 
     <!-- 中段：1枠 -->
     <div class="graph-box">グラフ③</div>
@@ -39,75 +68,84 @@
     </div>
 
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // サーバーから最新データを取得
-      fetch('/api/stats/age-gender')
-        .then(response => {
-           if (!response.ok) {
-             throw new Error('Network response was not ok');
-           }
-           return response.json();
-        })
-        .then(data => {
-          // グラフを描画
-          const ctx = document.getElementById('ageGenderChart').getContext('2d');
-          new Chart(ctx, {
-            type: 'bar',
-            data: {
-              labels: data.labels,
-              datasets: data.datasets
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false, // 枠に合わせてサイズ自動調整
-              scales: {
-                x: { stacked: false }, // 積み上げにしない
-                y: { beginAtZero: true, stepSize: 1 }
-              },
-              plugins: {
-                title: { display: true, text: '年代別・性別ユーザー構成' },
-                legend: { position: 'bottom' }
-              }
-            }
-          });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // グラフ枠にエラーを表示する（デバッグ用）
-            document.querySelector('.graph-box').innerText = 'グラフの読み込みに失敗しました';
-        });
-    });
-  </script>
-</body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <script>
-    // <!-- グラフ④の描画 -->
-    document.addEventListener('DOMContentLoaded', async function() {
-      const ctx = document.getElementById('daily-sales-chart').getContext('2d');
-      // APIからデータ取得
-      const res = await fetch('/orders/api/sales/daily');
-      const json = await res.json();
-      const labels = json.labels;
-      const data = json.data;
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  /* ===== グラフ①：年齢 × 性別 ===== */
+  fetch('/api/stats/age-gender')
+    .then(res => res.json())
+    .then(data => {
+      const ctx = document.getElementById('ageGenderChart').getContext('2d');
       new Chart(ctx, {
-        type: 'line', // 折れ線グラフを指定
+        type: 'bar',
         data: {
-          labels: labels, // X軸ラベル（日付）
+          labels: data.labels,
+          datasets: data.datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true }
+          },
+          plugins: {
+            title: { display: true, text: '年代別・性別ユーザー構成' },
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    })
+    .catch(() => {
+      document.querySelector('#ageGenderChart')
+        .parentElement.innerText = 'グラフの読み込みに失敗しました';
+    });
+
+  /* ===== グラフ②：ポイント消費ランキング（円グラフ） ===== */
+  const userLabels = {{ labels | tojson }};
+  const userValues = {{ values | tojson }};
+
+  const rankingCtx = document
+    .getElementById('user_ranking_chart')
+    .getContext('2d');
+
+  new Chart(rankingCtx, {
+    type: 'pie',
+    data: {
+      labels: userLabels,
+      datasets: [{
+        data: userValues,
+        radius: '80%'
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+
+  /* ===== グラフ④：日別売上 ===== */
+  fetch('/orders/api/sales/daily')
+    .then(res => res.json())
+    .then(json => {
+      const ctx = document.getElementById('daily-sales-chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: json.labels,
           datasets: [{
-            label: '日別売上', // 凡例
-            data: data, // Y軸の値（売上金額）
-            borderColor: 'rgba(75, 192, 192, 1)', // 色
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            fill: false, // 塗りつぶす
-            tension: 0, // 線の滑らかさ 
+            label: '日別売上',
+            data: json.data,
+            fill: false,
+            tension: 0
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: { display: true },
             title: { display: true, text: '日別売上（円）' }
           },
           scales: {
@@ -116,5 +154,10 @@
         }
       });
     });
-  </script>
+
+});
+</script>
+
+</body>
 </html>
+
