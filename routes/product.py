@@ -41,13 +41,19 @@ def edit(product_id):
 
 @product_bp.route('/api')
 def api():
-    products = Product.select()
-    price_sum = {}
-    for p in products:
-        name = p.name
-        price = float(p.price)
-        if name in price_sum:
-            price_sum[name] += price
+    # 注文データから製品ごとの売上合計を計算
+    sales_query = (Order
+                   .select(Order.product, fn.SUM(Order.count * Product.price).alias('total'))
+                   .join(Product)
+                   .group_by(Order.product))
+    
+    sales = {}
+    for row in sales_query:
+        product_name = row.product.name
+        total = float(row.total) if row.total else 0
+        if product_name in sales:
+            sales[product_name] += total
         else:
-            price_sum[name] = price
-    return jsonify({'products': [{'name': name, 'price': price} for name, price in price_sum.items()]})
+            sales[product_name] = total
+    
+    return jsonify({'sales': [{'name': name, 'price': price} for name, price in sales.items()]})
